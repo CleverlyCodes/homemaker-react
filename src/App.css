@@ -59,6 +59,12 @@ button {
   background-color: #519d77;
   border: 0;
   color: white;
+  margin-left: 5px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #3d815f;
 }
 
 @keyframes App-logo-spin {
