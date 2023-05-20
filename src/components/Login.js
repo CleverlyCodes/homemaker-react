@@ -8,6 +8,7 @@ import {
     signInWithPopup,
     signOut,
 } from 'firebase/auth';
+import RecipeCard from "./RecipeCard";
 
 import { getFirestore } from "firebase/firestore";
 import { collection, getDocs } from "firebase/firestore"; 
@@ -88,14 +89,10 @@ export default function Login () {
         }
       {/* </header> */}
 
-      <div>
+      <div className="recipe-section">
       {recipes.map((recipe) => {
         return (
-          <div key={recipe.id}>
-            <h2>Recipe Name: {recipe.name}</h2>
-            <h2>Description: {recipe.description}</h2>
-            <hr />
-          </div>
+          <RecipeCard recipe={recipe} />
         );
       })}
       </div>
