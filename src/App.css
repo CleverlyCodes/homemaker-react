@@ -28,6 +28,14 @@
   color: #61dafb;
 }
 
+button {
+  padding: 10px 15px;
+  font-family: 'Helvetica';
+  background-color: #519d77;
+  border: 0;
+  color: white;
+}
+
 @keyframes App-logo-spin {
   from {
     transform: rotate(0deg);
