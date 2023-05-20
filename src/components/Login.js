@@ -29,6 +29,7 @@ export default function Login () {
   const logOut = (() => {
     signOut(auth);
     setUser(null);
+    setList([]);
   });
 
   const signIn = (() => {
@@ -159,27 +160,23 @@ export default function Login () {
               <h1>{currentItem.name}</h1>
               <h2>{currentItem.description}</h2>
 
-              <h3>Ingredients:</h3>
+              {
+                currentItem.ingredients
+                  ? <h3>Ingredients:</h3>
+                  : <></>
+              }
+              
             </>
           : <></>
       }
 
-      {
-        list?.length !== 0
-          ? <>
-              <div className="recipe-section">
-                {list.map((item) => {
-                  return (
-                    <ItemCard selectItem={selectItem} key={item.id} item={item} />
-                  );
-                })}
-              </div>
-            </>
-          : <>
-              <p>None yet</p>
-            </>
-      }
-
+      <div className="recipe-section">
+        {list.map((item) => {
+          return (
+            <ItemCard selectItem={selectItem} key={item.id} item={item} />
+          );
+        })}
+      </div>
     </div>
   );
 }
