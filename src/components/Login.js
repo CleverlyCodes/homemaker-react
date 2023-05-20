@@ -8,7 +8,7 @@ import {
     signInWithPopup,
     signOut,
 } from 'firebase/auth';
-import RecipeCard from "./RecipeCard";
+import ItemCard from "./ItemCard";
 
 import { getFirestore } from "firebase/firestore";
 import { collection, getDocs } from "firebase/firestore"; 
@@ -20,7 +20,7 @@ export default function Login () {
   const auth = getAuth();
 
   const [user, setUser] = useState(null);
-  const [recipes, setRecipes] = useState([]);
+  const [list, setList] = useState([]);
 
   // Initialize Cloud Firestore and get a reference to the service
   const db = getFirestore(app);
@@ -57,13 +57,28 @@ export default function Login () {
 
     getDocs(collection(db, "recipes")).then((results) => {
       results.forEach((result) => {
-        console.log(result.data().name);
+        console.log(`${result.id} ${result.data().name}`);
         if (result.data().created_by === user.uid) {
-          recipes.push(result.data());
+          recipes.push({id: result.id, data: result.data()});
         }
       });
 
-      setRecipes(recipes);
+      setList(recipes);
+    });
+  });
+
+  const getIngredients = (() => {
+    const ingredients = [];
+
+    getDocs(collection(db, "ingredients")).then((results) => {
+      results.forEach((result) => {
+        console.log(`${result.id} ${result.data().name}`);
+        if (result.data().created_by === user.uid) {
+          ingredients.push({id: result.id, data: result.data()});
+        }
+      });
+
+      setList(ingredients);
     });
   });
 
@@ -93,14 +108,17 @@ export default function Login () {
 
       {
         user 
-          ? <button onClick={getRecipes}>Get Recipes</button>
+          ? <>
+              <button onClick={getRecipes}>Get Recipes</button>
+              <button onClick={getIngredients}>Get Ingredients</button>
+            </>
           : <></>
       }
 
       <div className="recipe-section">
-      {recipes.map((recipe) => {
+      {list.map((item) => {
         return (
-          <RecipeCard recipe={recipe} />
+          <ItemCard key={item.id} recipe={item.data} />
         );
       })}
       </div>
