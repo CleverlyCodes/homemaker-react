@@ -9,13 +9,20 @@ import {
     signOut,
 } from 'firebase/auth';
 
+import { getFirestore } from "firebase/firestore";
+import { collection, getDocs } from "firebase/firestore"; 
+
 export default function Login () {
 
-  initializeApp(firebaseConfig);
+  const app = initializeApp(firebaseConfig);
   const provider = new GoogleAuthProvider();
   const auth = getAuth();
 
   const [user, setUser] = useState(null);
+  const [recipes, setRecipes] = useState([]);
+
+  // Initialize Cloud Firestore and get a reference to the service
+  const db = getFirestore(app);
 
   const logOut = (() => {
     signOut(auth);
@@ -44,21 +51,54 @@ export default function Login () {
     });
   });
 
+  const getRecipes = (() => {
+    const recipes = [];
+
+    getDocs(collection(db, "recipes")).then((results) => {
+      results.forEach((result) => {
+        console.log(result.data().name);
+        if (result.data().created_by === user.uid) {
+          recipes.push(result.data());
+        }
+      });
+
+      setRecipes(recipes);
+    });
+  });
+
   return (
     <div className="App">
-      <header className="App-header">
+      {/* <header className="App-header"> */}
         <img src={logo} className="App-logo" alt="logo" />
         {
           user 
-            ? <p>Hello, {user.displayName}</p>
+            ? <>
+                <p>Hello, {user.displayName}</p>
+                <span>User ID: {user.uid}</span>
+              </>
             : <p>Please sign in.</p>
         }
         {
           user
-            ? <button onClick={logOut}>Sign out</button>
+            ? <>
+                <button onClick={logOut}>Sign out</button>
+                <button onClick={getRecipes}>Get Recipes</button>
+              </>
             : <button onClick={signIn}>Sign in with Google</button>
         }
-      </header>
+      {/* </header> */}
+
+      <div>
+      {recipes.map((recipe) => {
+        return (
+          <div key={recipe.id}>
+            <h2>Recipe Name: {recipe.name}</h2>
+            <h2>Description: {recipe.description}</h2>
+            <hr />
+          </div>
+        );
+      })}
+      </div>
     </div>
   );
 }
