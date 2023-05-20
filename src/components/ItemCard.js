@@ -1,5 +1,5 @@
 export default function ItemCard(props) {
-  const { id, name, description } = props.recipe;
+  const { name, description } = props.recipe;
 
   return (
     <div className="card">
