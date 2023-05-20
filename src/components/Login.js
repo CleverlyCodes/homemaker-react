@@ -11,7 +11,7 @@ import {
 import ItemCard from "./ItemCard";
 
 import { getFirestore } from "firebase/firestore";
-import { collection, getDocs } from "firebase/firestore"; 
+import { doc, collection, getDocs, getDoc } from "firebase/firestore"; 
 
 export default function Login () {
 
@@ -21,6 +21,7 @@ export default function Login () {
 
   const [user, setUser] = useState(null);
   const [list, setList] = useState([]);
+  const [currentItem, setCurrentItem] = useState(null);
 
   // Initialize Cloud Firestore and get a reference to the service
   const db = getFirestore(app);
@@ -59,10 +60,11 @@ export default function Login () {
       results.forEach((result) => {
         console.log(`${result.id} ${result.data().name}`);
         if (result.data().created_by === user.uid) {
-          recipes.push({id: result.id, data: result.data()});
+          recipes.push({type: 'recipes', id: result.id, data: result.data()});
         }
       });
 
+      setCurrentItem(null);
       setList(recipes);
     });
   });
@@ -74,12 +76,48 @@ export default function Login () {
       results.forEach((result) => {
         console.log(`${result.id} ${result.data().name}`);
         if (result.data().created_by === user.uid) {
-          ingredients.push({id: result.id, data: result.data()});
+          ingredients.push({type: 'ingredients', id: result.id, data: result.data()});
         }
       });
 
+      setCurrentItem(null);
       setList(ingredients);
     });
+  });
+
+  const getSpecificIngredients = ((ingredients) => {
+    if (!ingredients) return;
+    const ingredientsList = [];
+
+    ingredients.forEach(async (item) => {
+      const docRef = doc(db, 'ingredients', item);
+      const ingredient = await getDoc(docRef);
+
+      if (ingredient.exists()) {
+        console.log("Document data:", ingredient.data());
+        ingredientsList.push({type: 'ingredients', id: ingredient.id, data: ingredient.data()});
+        setList(ingredientsList);
+      } else {
+        // docSnap.data() will be undefined in this case
+        console.log("No such document!");
+      }
+    });
+  });
+
+  const selectItem = (async (itemId, type) => {
+    const docRef = doc(db, type, itemId);
+    const docSnap = await getDoc(docRef);
+
+    if (docSnap.exists()) {
+      setList([])
+      console.log("Document data:", docSnap.data());
+      setCurrentItem(docSnap.data());
+
+      getSpecificIngredients(docSnap.data().ingredients);
+    } else {
+      // docSnap.data() will be undefined in this case
+      console.log("No such document!");
+    }
   });
 
   return (
@@ -115,13 +153,33 @@ export default function Login () {
           : <></>
       }
 
-      <div className="recipe-section">
-      {list.map((item) => {
-        return (
-          <ItemCard key={item.id} recipe={item.data} />
-        );
-      })}
-      </div>
+      {
+        currentItem
+          ? <>
+              <h1>{currentItem.name}</h1>
+              <h2>{currentItem.description}</h2>
+
+              <h3>Ingredients:</h3>
+            </>
+          : <></>
+      }
+
+      {
+        list?.length !== 0
+          ? <>
+              <div className="recipe-section">
+                {list.map((item) => {
+                  return (
+                    <ItemCard selectItem={selectItem} key={item.id} item={item} />
+                  );
+                })}
+              </div>
+            </>
+          : <>
+              <p>None yet</p>
+            </>
+      }
+
     </div>
   );
 }
