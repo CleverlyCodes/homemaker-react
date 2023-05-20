@@ -1,4 +1,4 @@
-export default function RecipeCard(props) {
+export default function ItemCard(props) {
   const { name, description } = props.recipe;
 
   return (
