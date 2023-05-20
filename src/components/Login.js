@@ -69,8 +69,8 @@ export default function Login () {
 
   return (
     <div className="App">
-      {/* <header className="App-header"> */}
-        <img src={logo} className="App-logo" alt="logo" />
+      <header className="App-header">
+        <h1>Home Maker</h1>
         {
           user 
             ? <>
@@ -83,11 +83,12 @@ export default function Login () {
           user
             ? <>
                 <button onClick={logOut}>Sign out</button>
-                <button onClick={getRecipes}>Get Recipes</button>
               </>
             : <button onClick={signIn}>Sign in with Google</button>
         }
-      {/* </header> */}
+      </header>
+
+      <button onClick={getRecipes}>Get Recipes</button>
 
       <div className="recipe-section">
       {recipes.map((recipe) => {
