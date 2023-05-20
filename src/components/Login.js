@@ -71,11 +71,14 @@ export default function Login () {
     <div className="App">
       <header className="App-header">
         <h1>Home Maker</h1>
+      </header>
+
+      <header className="subheader">
         {
           user 
             ? <>
                 <p>Hello, {user.displayName}</p>
-                <span>User ID: {user.uid}</span>
+                <p>User ID: {user.uid}</p>
               </>
             : <p>Please sign in.</p>
         }
@@ -88,7 +91,11 @@ export default function Login () {
         }
       </header>
 
-      <button onClick={getRecipes}>Get Recipes</button>
+      {
+        user 
+          ? <button onClick={getRecipes}>Get Recipes</button>
+          : <></>
+      }
 
       <div className="recipe-section">
       {recipes.map((recipe) => {

@@ -24,7 +24,16 @@
   color: white;
 }
 
-.App-header * {
+.subheader {
+  display: flex;
+  flex-direction: row;
+  align-items: right;
+  justify-content: right;
+  padding: 1vh 3vh;
+  background-color: #f5f5f5;
+}
+
+.App-header *, .subheader * {
   margin-right: 15px;
 }
 
@@ -45,7 +54,7 @@
 
 button {
   display: inline-block;
-  padding: 10px 15px;
+  padding: 5px 20px;
   font-family: 'Helvetica';
   background-color: #519d77;
   border: 0;
