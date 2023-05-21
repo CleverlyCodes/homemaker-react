@@ -11,7 +11,7 @@ import {
 import ItemCard from "./ItemCard";
 
 import { getFirestore } from "firebase/firestore";
-import { doc, collection, getDocs, getDoc, addDoc } from "firebase/firestore"; 
+import { doc, collection, getDocs, getDoc, addDoc, deleteDoc } from "firebase/firestore"; 
 
 export default function Login () {
 
@@ -62,6 +62,12 @@ export default function Login () {
       created_by: user.uid,
     });
     console.log("Document written with ID: ", docRef.id);
+
+    getRecipes();
+  });
+
+  const deleteItem = (async (itemId, type) => {
+    await deleteDoc(doc(db, type, itemId));
 
     getRecipes();
   });
@@ -188,7 +194,7 @@ export default function Login () {
       <div className="recipe-section">
         {list.map((item) => {
           return (
-            <ItemCard selectItem={selectItem} key={item.id} item={item} />
+            <ItemCard selectItem={selectItem} deleteItem={deleteItem} key={item.id} item={item} />
           );
         })}
       </div>
