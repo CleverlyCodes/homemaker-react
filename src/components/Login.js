@@ -20,8 +20,6 @@ export default function Login () {
 
   const [user, setUser] = useState(null);
   const [list, setList] = useState([]);
-  const [recipesList, setRecipes] = useState([]);
-  const [ingredientsList, setIngredients] = useState([]);
   const [currentItem, setCurrentItem] = useState(null);
 
   // Initialize Cloud Firestore and get a reference to the service
@@ -55,48 +53,60 @@ export default function Login () {
     });
   });
 
-  const createItem = (async (title, description, type) => {
-    // Add a new document with a generated id.
-    const docRef = await addDoc(collection(db, type), {
-      name: title,
-      description: description,
-      created_by: user.uid,
-    });
-    console.log(`${type} written with ID: ${docRef.id}`);
-
+  const getItems = ((type) => {
     switch(type) {
       case 'ingredients':
         return getIngredients();
       case 'recipes':
         return getRecipes();
-      default:
-        return getRecipes();
     }
+  });
+
+  const createItem = (async (title, description, type) => {
+    const item = {
+      name: title,
+      description: description,
+      created_by: user.uid,
+    };
+    // Add a new document with a generated id.
+    const docRef = await addDoc(collection(db, type), item);
+    console.log(`${type} written with ID: ${docRef.id}`);
+
+    if (localStorage.getItem(type)) {
+      let ingredientsList = JSON.parse(localStorage.getItem(type));
+      ingredientsList.push({type: type, id: docRef.id, data: item});
+      localStorage.setItem(type, JSON.stringify(ingredientsList));
+
+      return retrieveItems(type);
+    }
+
+    getItems();
   });
 
   const deleteItem = (async (itemId, type) => {
     await deleteDoc(doc(db, type, itemId));
 
+    if (localStorage.getItem(type)) {
+      const ingredientsList = JSON.parse(localStorage.getItem(type));
+      localStorage.setItem(type, JSON.stringify(ingredientsList.filter((item) => item.id !== itemId)));
+
+      return retrieveItems(type);
+    }
+
+    getItems();
+  });
+
+  const retrieveItems = ((type) => {
     switch(type) {
       case 'ingredients':
-        return getIngredients();
+        return setList(JSON.parse(localStorage.getItem('ingredients')));
       case 'recipes':
-        return getRecipes();
-      default:
-        return getRecipes();
+        return setList(JSON.parse(localStorage.getItem('recipes')));
     }
   });
 
   const getRecipes = (() => {
     const recipes = [];
-
-    if (JSON.parse(localStorage.getItem('recipesList')).length !== 0) {
-      const storedRecipes = JSON.parse(localStorage.getItem('recipesList'));
-
-      console.log(storedRecipes);
-
-      return setList(storedRecipes);
-    }
 
     getDocs(collection(db, "recipes")).then((results) => {
       results.forEach((result) => {
@@ -108,8 +118,8 @@ export default function Login () {
 
       const jsonifiedRecipes = JSON.stringify(recipes);
 
-      if (jsonifiedRecipes !== localStorage.getItem('recipesList')) {
-        localStorage.setItem('recipesList', jsonifiedRecipes);
+      if (jsonifiedRecipes !== localStorage.getItem('recipes')) {
+        localStorage.setItem('recipes', jsonifiedRecipes);
       }
 
       setCurrentItem(null);
@@ -119,14 +129,6 @@ export default function Login () {
 
   const getIngredients = (() => {
     const ingredients = [];
-
-    if (JSON.parse(localStorage.getItem('ingredientsList')).length !== 0) {
-      const storedIngredients = JSON.parse(localStorage.getItem('ingredientsList'));
-
-      console.log(storedIngredients);
-
-      return setList(storedIngredients);
-    }
 
     getDocs(collection(db, "ingredients")).then((results) => {
       results.forEach((result) => {
@@ -138,8 +140,8 @@ export default function Login () {
 
       const jsonifiedIngredients = JSON.stringify(ingredients);
 
-      if (jsonifiedIngredients !== localStorage.getItem('ingredientsList')) {
-        localStorage.setItem('ingredientsList', jsonifiedIngredients);
+      if (jsonifiedIngredients !== localStorage.getItem('ingredients')) {
+        localStorage.setItem('ingredients', jsonifiedIngredients);
       }
 
       setCurrentItem(null);
