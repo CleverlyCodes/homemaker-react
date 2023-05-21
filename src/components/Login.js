@@ -53,35 +53,62 @@ export default function Login () {
     });
   });
 
-  const createItem = (async (title, description, type) => {
-    // Add a new document with a generated id.
-    const docRef = await addDoc(collection(db, type), {
-      name: title,
-      description: description,
-      created_by: user.uid,
-    });
-    console.log(`${type} written with ID: ${docRef.id}`);
+  const clearItems = () => {
+    setCurrentItem(null);
+    setList([]);
+  }
 
+  const getItems = ((type) => {
     switch(type) {
       case 'ingredients':
         return getIngredients();
       case 'recipes':
-        return getRecipes();
-      default:
         return getRecipes();
     }
   });
 
+  const createItem = (async (title, description, type) => {
+    clearItems();
+    const item = {
+      name: title,
+      description: description,
+      created_by: user.uid,
+    };
+    // Add a new document with a generated id.
+    const docRef = await addDoc(collection(db, type), item);
+    console.log(`${type} written with ID: ${docRef.id}`);
+
+    if (localStorage.getItem(type)) {
+      let ingredientsList = JSON.parse(localStorage.getItem(type));
+      ingredientsList.push({type: type, id: docRef.id, data: item});
+      localStorage.setItem(type, JSON.stringify(ingredientsList));
+
+      return retrieveItems(type);
+    }
+
+    getItems();
+  });
+
   const deleteItem = (async (itemId, type) => {
+    clearItems();
     await deleteDoc(doc(db, type, itemId));
 
+    if (localStorage.getItem(type)) {
+      const ingredientsList = JSON.parse(localStorage.getItem(type));
+      localStorage.setItem(type, JSON.stringify(ingredientsList.filter((item) => item.id !== itemId)));
+
+      return retrieveItems(type);
+    }
+
+    getItems();
+  });
+
+  const retrieveItems = ((type) => {
     switch(type) {
       case 'ingredients':
-        return getIngredients();
+        return setList(JSON.parse(localStorage.getItem('ingredients')));
       case 'recipes':
-        return getRecipes();
-      default:
-        return getRecipes();
+        return setList(JSON.parse(localStorage.getItem('recipes')));
     }
   });
 
@@ -95,6 +122,12 @@ export default function Login () {
           recipes.push({type: 'recipes', id: result.id, data: result.data()});
         }
       });
+
+      const jsonifiedRecipes = JSON.stringify(recipes);
+
+      if (jsonifiedRecipes !== localStorage.getItem('recipes')) {
+        localStorage.setItem('recipes', jsonifiedRecipes);
+      }
 
       setCurrentItem(null);
       setList(recipes);
@@ -111,6 +144,12 @@ export default function Login () {
           ingredients.push({type: 'ingredients', id: result.id, data: result.data()});
         }
       });
+
+      const jsonifiedIngredients = JSON.stringify(ingredients);
+
+      if (jsonifiedIngredients !== localStorage.getItem('ingredients')) {
+        localStorage.setItem('ingredients', jsonifiedIngredients);
+      }
 
       setCurrentItem(null);
       setList(ingredients);
@@ -183,6 +222,8 @@ export default function Login () {
               <button onClick={event => createItem('Soy Sauce', 'Soy sauce is a liquid condiment of Chinese origin...', 'ingredients')}>Add Ingredient</button>
               <button onClick={getRecipes}>Get Recipes</button>
               <button onClick={getIngredients}>Get Ingredients</button>
+              <button onClick={event => retrieveItems('recipes')}>Retrieve Recipes</button>
+              <button onClick={event => retrieveItems('ingredients')}>Retrieve Ingredients</button>
             </>
           : <>
               <button onClick={event => createItem('Sundubu Jjigae', 'Korean seafood tofu soup', 'recipes')}>Add Recipe</button>
