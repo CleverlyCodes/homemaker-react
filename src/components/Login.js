@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import firebaseConfig from '../firebaseConfig';
 import { initializeApp } from "firebase/app";
 import {
