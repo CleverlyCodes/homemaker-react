@@ -11,7 +11,7 @@ import {
 import ItemCard from "./ItemCard";
 
 import { getFirestore } from "firebase/firestore";
-import { doc, collection, getDocs, getDoc } from "firebase/firestore"; 
+import { doc, collection, getDocs, getDoc, addDoc } from "firebase/firestore"; 
 
 export default function Login () {
 
@@ -52,6 +52,18 @@ export default function Login () {
       const credential = GoogleAuthProvider.credentialFromError(error);
       // ...
     });
+  });
+
+  const addRecipe = (async (title, description) => {
+    // Add a new document with a generated id.
+    const docRef = await addDoc(collection(db, "recipes"), {
+      name: title,
+      description: description,
+      created_by: user.uid,
+    });
+    console.log("Document written with ID: ", docRef.id);
+
+    getRecipes();
   });
 
   const getRecipes = (() => {
@@ -148,10 +160,13 @@ export default function Login () {
       {
         user 
           ? <>
+              <button onClick={event => addRecipe('Sundubu Jjigae', 'Korean seafood tofu soup')}>Add Recipe</button>
               <button onClick={getRecipes}>Get Recipes</button>
               <button onClick={getIngredients}>Get Ingredients</button>
             </>
-          : <></>
+          : <>
+              <button onClick={addRecipe}>Add Recipe</button>
+            </>
       }
 
       {
