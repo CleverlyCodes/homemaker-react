@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import firebaseConfig from '../firebaseConfig';
 import { initializeApp } from "firebase/app";
 import {
@@ -20,6 +20,8 @@ export default function Login () {
 
   const [user, setUser] = useState(null);
   const [list, setList] = useState([]);
+  const [recipesList, setRecipes] = useState([]);
+  const [ingredientsList, setIngredients] = useState([]);
   const [currentItem, setCurrentItem] = useState(null);
 
   // Initialize Cloud Firestore and get a reference to the service
@@ -88,6 +90,14 @@ export default function Login () {
   const getRecipes = (() => {
     const recipes = [];
 
+    if (JSON.parse(localStorage.getItem('recipesList')).length !== 0) {
+      const storedRecipes = JSON.parse(localStorage.getItem('recipesList'));
+
+      console.log(storedRecipes);
+
+      return setList(storedRecipes);
+    }
+
     getDocs(collection(db, "recipes")).then((results) => {
       results.forEach((result) => {
         console.log(`${result.id} ${result.data().name}`);
@@ -95,6 +105,12 @@ export default function Login () {
           recipes.push({type: 'recipes', id: result.id, data: result.data()});
         }
       });
+
+      const jsonifiedRecipes = JSON.stringify(recipes);
+
+      if (jsonifiedRecipes !== localStorage.getItem('recipesList')) {
+        localStorage.setItem('recipesList', jsonifiedRecipes);
+      }
 
       setCurrentItem(null);
       setList(recipes);
@@ -104,6 +120,14 @@ export default function Login () {
   const getIngredients = (() => {
     const ingredients = [];
 
+    if (JSON.parse(localStorage.getItem('ingredientsList')).length !== 0) {
+      const storedIngredients = JSON.parse(localStorage.getItem('ingredientsList'));
+
+      console.log(storedIngredients);
+
+      return setList(storedIngredients);
+    }
+
     getDocs(collection(db, "ingredients")).then((results) => {
       results.forEach((result) => {
         console.log(`${result.id} ${result.data().name}`);
@@ -111,6 +135,12 @@ export default function Login () {
           ingredients.push({type: 'ingredients', id: result.id, data: result.data()});
         }
       });
+
+      const jsonifiedIngredients = JSON.stringify(ingredients);
+
+      if (jsonifiedIngredients !== localStorage.getItem('ingredientsList')) {
+        localStorage.setItem('ingredientsList', jsonifiedIngredients);
+      }
 
       setCurrentItem(null);
       setList(ingredients);
