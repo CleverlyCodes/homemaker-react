@@ -222,6 +222,8 @@ export default function Login () {
               <button onClick={event => createItem('Soy Sauce', 'Soy sauce is a liquid condiment of Chinese origin...', 'ingredients')}>Add Ingredient</button>
               <button onClick={getRecipes}>Get Recipes</button>
               <button onClick={getIngredients}>Get Ingredients</button>
+              <button onClick={event => retrieveItems('recipes')}>Retrieve Recipes</button>
+              <button onClick={event => retrieveItems('ingredients')}>Retrieve Ingredients</button>
             </>
           : <>
               <button onClick={event => createItem('Sundubu Jjigae', 'Korean seafood tofu soup', 'recipes')}>Add Recipe</button>
