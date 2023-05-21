@@ -53,6 +53,11 @@ export default function Login () {
     });
   });
 
+  const clearItems = () => {
+    setCurrentItem(null);
+    setList([]);
+  }
+
   const getItems = ((type) => {
     switch(type) {
       case 'ingredients':
@@ -63,6 +68,7 @@ export default function Login () {
   });
 
   const createItem = (async (title, description, type) => {
+    clearItems();
     const item = {
       name: title,
       description: description,
@@ -84,6 +90,7 @@ export default function Login () {
   });
 
   const deleteItem = (async (itemId, type) => {
+    clearItems();
     await deleteDoc(doc(db, type, itemId));
 
     if (localStorage.getItem(type)) {
