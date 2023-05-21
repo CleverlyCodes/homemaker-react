@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import firebaseConfig from '../firebaseConfig';
-import logo from '../logo.svg';
 import { initializeApp } from "firebase/app";
 import {
     GoogleAuthProvider,
@@ -54,22 +53,36 @@ export default function Login () {
     });
   });
 
-  const addRecipe = (async (title, description) => {
+  const createItem = (async (title, description, type) => {
     // Add a new document with a generated id.
-    const docRef = await addDoc(collection(db, "recipes"), {
+    const docRef = await addDoc(collection(db, type), {
       name: title,
       description: description,
       created_by: user.uid,
     });
-    console.log("Document written with ID: ", docRef.id);
+    console.log(`${type} written with ID: ${docRef.id}`);
 
-    getRecipes();
+    switch(type) {
+      case 'ingredients':
+        return getIngredients();
+      case 'recipes':
+        return getRecipes();
+      default:
+        return getRecipes();
+    }
   });
 
   const deleteItem = (async (itemId, type) => {
     await deleteDoc(doc(db, type, itemId));
 
-    getRecipes();
+    switch(type) {
+      case 'ingredients':
+        return getIngredients();
+      case 'recipes':
+        return getRecipes();
+      default:
+        return getRecipes();
+    }
   });
 
   const getRecipes = (() => {
@@ -166,12 +179,14 @@ export default function Login () {
       {
         user 
           ? <>
-              <button onClick={event => addRecipe('Sundubu Jjigae', 'Korean seafood tofu soup')}>Add Recipe</button>
+              <button onClick={event => createItem('Sundubu Jjigae', 'Korean seafood tofu soup', 'recipes')}>Add Recipe</button>
+              <button onClick={event => createItem('Soy Sauce', 'Soy sauce is a liquid condiment of Chinese origin...', 'ingredients')}>Add Ingredient</button>
               <button onClick={getRecipes}>Get Recipes</button>
               <button onClick={getIngredients}>Get Ingredients</button>
             </>
           : <>
-              <button onClick={addRecipe}>Add Recipe</button>
+              <button onClick={event => createItem('Sundubu Jjigae', 'Korean seafood tofu soup', 'recipes')}>Add Recipe</button>
+              <button onClick={event => createItem('Soy Sauce', 'Soy sauce is a liquid condiment of Chinese origin...', 'ingredients')}>Add Ingredient</button>
             </>
       }
 
